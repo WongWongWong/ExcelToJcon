@@ -90,9 +90,8 @@ namespace ConfigPacking
         /// </summary>
         /// <param name="excelPath"></param>
         /// <param name="exprotPath"></param>
-        public static void ExprotJson(string excelPath, string exprotPath)
+        public static void ExprotLua(string excelPath, string exprotPath, bool isServer = false)
         {
-
             try
             {
                 //创建文件夹
@@ -100,10 +99,26 @@ namespace ConfigPacking
 
                 if (exprotPath.IndexOf("\\") != -1)
                 {
+                    if(isServer)
+                    {
+                        exprotPath += "Server\\";
+                    }
+                    else
+                    {
+                        exprotPath += "Client\\";
+                    }
                     FileManager.CreateDirPath(exprotPath.Substring(0, exprotPath.LastIndexOf("\\") + 1));
                 }
                 else
                 {
+                    if (isServer)
+                    {
+                        exprotPath += "Server/";
+                    }
+                    else
+                    {
+                        exprotPath += "Client/";
+                    }
                     var test1 = exprotPath.LastIndexOf("/");
                     string test = exprotPath.Substring(0, 10);
                     FileManager.CreateDirPath(exprotPath.Substring(0, exprotPath.LastIndexOf("/") + 1));
@@ -119,7 +134,7 @@ namespace ConfigPacking
             try
             {
                 //转化本地数据结构,创建表格字典
-                dict = LoadExcel(excelPath);
+                dict = LoadExcel(excelPath, isServer);
             }
             catch (Exception ex)
             {
@@ -160,7 +175,7 @@ namespace ConfigPacking
                 try
                 {
                     //转成json字符串
-                    jsonDict = ToJsonDict(dict);
+                    jsonDict = ToLuaDict(dict);
                 }
                 catch (Exception ex)
                 {
@@ -171,7 +186,7 @@ namespace ConfigPacking
                 // 输出到多个文件里
                 foreach (var configName in jsonDict.Keys)
                 {
-                    var fullPath = exprotPath + configName + ".json";
+                    var fullPath = exprotPath + configName + ".lua";
                     jsonStr = jsonDict[configName];
                     try
                     {
@@ -406,6 +421,174 @@ namespace ConfigPacking
             return ret;
         }
 
+        public static Dictionary<string, string> ToLuaDict(Dictionary<string, LoData> dict)
+        {
+            var ret = new Dictionary<string, string>();
+            foreach (var configName in dict.Keys)
+            {
+                var loData = dict[configName];
+                var luaStrList = LoDataToLuaStrList(loData);
+
+                string str = $"local {configName}=" + "{\n";
+                for (int i = 0; i < luaStrList.Count; i++)
+                {
+                    str += luaStrList[i];
+
+                    str += ",\n";
+                    //if (i < luaStrList.Count - 1)
+                    //{
+                    //    str += ",\n";
+                    //}
+                }
+
+                str += "\n\n\t-- 键映射\n";
+                str += "\tk = {\n";
+                // 生成映射
+                for(int i = 0; i< loData.names.Count;i++)
+                {
+                    string keyName = loData.names[i];
+                    if (string.IsNullOrEmpty(keyName))
+                        continue;
+
+                    str += $"\t\t{keyName} = " + $"\"{keyName}\",";
+                    string desc = loData.notes[i];
+                    if (!string.IsNullOrEmpty(desc))
+                    {
+                        str += $"-- {desc}"; 
+                    }
+                    str += "\n";
+                }
+                str += "\t}";
+
+                str += "\n}\n";
+
+
+                // 生成方法
+                str += "\nlocal cacheMap = {}\n";
+                string funcTemp = $"\nfunction {configName}:Get(key, value)\n" +
+                                    $"\tlocal mapKey = \"{configName}\"..\"_\"..key..\"_\"..value\n" +
+                                    $"\tlocal index = rawget(cacheMap, mapKey) or nil\n" +
+                                    $"\tif index then\n" +
+                                    $"\t\tif index > 0 then\n" +
+                                    $"\t\t\treturn GameConfigSetting[index]\n" +
+                                    $"\t\telse\n" +
+                                    $"\t\t\treturn nil\n" +
+                                    $"\t\tend\n" +
+                                    $"\tend\n" +
+                                    $"\tfor i,vo in ipairs({configName}) do\n" +
+                                    $"\t\tfor k,v in pairs(vo) do\n" +
+                                    $"\t\t\tif k == key and v == value then\n" +
+                                    $"\t\t\t\trawset(cacheMap, mapKey, i)\n" +
+                                    $"\t\t\t\treturn {configName}[i]\n" +
+                                    $"\t\t\tend\n" +
+                                    $"\t\tend\n" +
+                                    $"\tend\n" +
+                                    $"\n\trawset(cacheMap, mapKey, -1)" +
+                                    $"\n\treturn nil" +
+                                    $"\nend\n";
+                str += funcTemp;
+
+                str += $"\nreturn {configName}";
+
+                //var str = JsonMapper.ToJson(ary);
+                ////这句代码是为了解决unicode 转 中文问题
+                str = System.Text.RegularExpressions.Regex.Unescape(str);
+                ret.Add(loData.name, str);
+            }
+
+            return ret;
+        }
+
+        public static List<string> LoDataToLuaStrList(LoData loData)
+        {
+            List<string> ret = new List<string>();
+            var values = loData.values;
+            for (int i = 0; i < values.Count; i++)
+            {
+                string itemStr = "";
+                var rowValue = values[i];
+                foreach (string name in rowValue.Keys)
+                {
+                    string voStr = null;
+                    string temp = "{0}={1}";
+                    var typeIndex = loData.names.IndexOf(name);
+                    var type = loData.types[typeIndex];
+                    var valueStr = rowValue[name];
+
+                    int int_val;
+                    long long_val;
+                    double float_val;
+                    bool isInt;
+                    bool isFloat;
+
+                    switch (type)
+                    {
+                        case "int": // int32
+                        case "lang": // 多语言
+                        case "long": // int64
+                            isInt = long.TryParse(valueStr, out long_val);
+                            voStr = string.Format(temp, name, (isInt ? long_val : 0));
+                            break;
+
+                        case "string":
+                            if (valueStr != null)
+                            {
+
+                                voStr = string.Format(temp, name, "\"" + valueStr.Replace("\"", "\\\"") + "\"");
+                            }
+                            break;
+
+                        case "float":
+                        case "double":
+                            isInt = int.TryParse(valueStr, out int_val);
+                            if (isInt)
+                            {
+                                voStr = string.Format(temp, name, int_val);
+                            }
+                            else
+                            {
+                                isFloat = double.TryParse(valueStr, out float_val);
+                                if (isFloat)
+                                {
+                                    voStr = string.Format(temp, name, float_val);
+                                }
+                                else
+                                {
+                                    voStr = string.Format(temp, name, 0);
+                                }
+                            }
+                            break;
+
+                        case "bool":
+                            if (valueStr == "true" || valueStr == "TRUE" || valueStr == "1")
+                            {
+                                voStr = string.Format(temp, name, "true");
+                            }
+                            else
+                            {
+                                voStr = string.Format(temp, name, "false");
+                            }
+                            break;
+                    }
+                    if (!string.IsNullOrEmpty(voStr))
+                    {
+                        if (!string.IsNullOrEmpty(itemStr))
+                        {
+                            itemStr += ",";
+                        }
+                        itemStr += voStr;
+                    }
+                }
+                //ret.Add(jd);
+                if(!string.IsNullOrEmpty(itemStr))
+                {
+                    ret.Add("\t{" + itemStr + "}");
+                }
+            }
+
+
+            return ret;
+        }
 
         /// <summary>
         /// LoData转Lo类字符串

@@ -135,6 +135,41 @@ public class MyCanvas : MonoBehaviour
         AddLog("项目信息\"" + info.name + "\" 已删除");
     }
 
+
+    string FixedPath(string path)
+    {
+        string fix = path;
+        if (fix.IndexOf("\\") != -1)
+        {
+            if (fix[fix.Length - 1] != '\\')
+            {
+                fix += "\\";
+            }
+        }
+        else
+        {
+            if (fix[fix.Length - 1] != '/')
+            {
+                fix += "/";
+            }
+        }
+        return fix;
+    }
+
+    void CreateFolder(string folder)
+    {
+        if (folder.IndexOf("\\") != -1)
+        {
+            FileManager.CreateDirPath(folder.Substring(0, folder.LastIndexOf("\\") + 1));
+        }
+        else
+        {
+            var test1 = folder.LastIndexOf("/");
+            string test = folder.Substring(0, 10);
+            FileManager.CreateDirPath(folder.Substring(0, folder.LastIndexOf("/") + 1));
+        }
+    }
+
     public void ExprotJson()
     {
         if (string.IsNullOrEmpty(pathInput.text))
@@ -148,7 +183,9 @@ public class MyCanvas : MonoBehaviour
             return;
         }
 
-        ConfigPackingManager.ExprotJson(pathInput.text, jsonInput.text);
+
+        string output = FixedPath(jsonInput.text);
+        ConfigPackingManager.ExprotLua(pathInput.text, output);
     }
 
     public void ExprotServerJson()
@@ -163,8 +200,8 @@ public class MyCanvas : MonoBehaviour
             AddLog("Json输出路径不能为空!");
             return;
         }
-
-        ConfigPackingManager.ExprotServerJson(pathInput.text, jsonInput.text);
+        string output = FixedPath(jsonInput.text);
+        ConfigPackingManager.ExprotLua(pathInput.text, output, true);
     }
 
     public void ExprotLo()

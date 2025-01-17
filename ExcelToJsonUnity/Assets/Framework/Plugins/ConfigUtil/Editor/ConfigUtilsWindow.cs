@@ -97,7 +97,7 @@ namespace ConfigPacking.Editor
                     return;
                 }
 
-                ConfigPackingManager.ExprotJson(_excelPath, _jsonPath);
+                ConfigPackingManager.ExprotLua(_excelPath, _jsonPath);
             }
         }
 
