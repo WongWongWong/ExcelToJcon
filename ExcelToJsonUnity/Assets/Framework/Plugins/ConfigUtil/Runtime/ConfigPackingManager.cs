@@ -99,7 +99,7 @@ namespace ConfigPacking
 
                 if (exprotPath.IndexOf("\\") != -1)
                 {
-                    if(isServer)
+                    if (isServer)
                     {
                         exprotPath += "Server\\";
                     }
@@ -444,7 +444,7 @@ namespace ConfigPacking
                 str += "\n\n\t-- 键映射\n";
                 str += "\tk = {\n";
                 // 生成映射
-                for(int i = 0; i< loData.names.Count;i++)
+                for (int i = 0; i < loData.names.Count; i++)
                 {
                     string keyName = loData.names[i];
                     if (string.IsNullOrEmpty(keyName))
@@ -454,7 +454,7 @@ namespace ConfigPacking
                     string desc = loData.notes[i];
                     if (!string.IsNullOrEmpty(desc))
                     {
-                        str += $"-- {desc}"; 
+                        str += $"-- {desc}";
                     }
                     str += "\n";
                 }
@@ -470,7 +470,7 @@ namespace ConfigPacking
                                     $"\tlocal index = rawget(cacheMap, mapKey) or nil\n" +
                                     $"\tif index then\n" +
                                     $"\t\tif index > 0 then\n" +
-                                    $"\t\t\treturn GameConfigSetting[index]\n" +
+                                    $"\t\t\treturn {configName}[index]\n" +
                                     $"\t\telse\n" +
                                     $"\t\t\treturn nil\n" +
                                     $"\t\tend\n" +
@@ -580,7 +580,7 @@ namespace ConfigPacking
                     }
                 }
                 //ret.Add(jd);
-                if(!string.IsNullOrEmpty(itemStr))
+                if (!string.IsNullOrEmpty(itemStr))
                 {
                     ret.Add("\t{" + itemStr + "}");
                 }

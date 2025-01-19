@@ -17,7 +17,7 @@ function GameConfig123Setting:Get(key, value)
 	local index = rawget(cacheMap, mapKey) or nil
 	if index then
 		if index > 0 then
-			return GameConfigSetting[index]
+			return GameConfig123Setting[index]
 		else
 			return nil
 		end
