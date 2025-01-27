@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
+using UnityEngine;
 
 namespace ConfigPacking
 {
@@ -32,6 +33,13 @@ namespace ConfigPacking
         static string langTemplate = "" +
             "    public string $name$ => LanguageManager.Instance.GetLanguageText($langId$);\n\n";
 
+        static string luaTemp;
+
+        static ConfigPackingManager()
+        {
+            var luaTemp = Resources.Load<TextAsset>("Temp");
+            ConfigPackingManager.luaTemp = luaTemp.text;
+        }
         /// <summary>
         /// 导出lo
         /// </summary>
@@ -175,7 +183,7 @@ namespace ConfigPacking
                 try
                 {
                     //转成json字符串
-                    jsonDict = ToLuaDict(dict);
+                    jsonDict = ToLuaDict_1(dict);
                 }
                 catch (Exception ex)
                 {
@@ -499,6 +507,70 @@ namespace ConfigPacking
             return ret;
         }
 
+        public static Dictionary<string, string> ToLuaDict_1(Dictionary<string, LoData> dict)
+        {
+            var ret = new Dictionary<string, string>();
+            foreach (var configName in dict.Keys)
+            {
+                var loData = dict[configName];
+                var luaStrList = LoDataToLuaStrList(loData);
+
+                string str0 = "";
+                for (int i = 0; i < luaStrList.Count; i++)
+                {
+                    str0 += luaStrList[i];
+                    if (i < luaStrList.Count - 1)
+                        str0 += ",\n\t";
+                }
+
+                // 生成映射
+                string str1 = "";
+                for (int i = 0; i < loData.names.Count; i++)
+                {
+                    string keyName = loData.names[i];
+                    if (string.IsNullOrEmpty(keyName))
+                        continue;
+                    var type = loData.types[i];
+                    string typeName;
+                    switch (type)
+                    {
+                        case "int":
+                        case "lang":
+                        case "long":
+                        case "float":
+                        case "double":
+                            typeName = "number";
+                            break;
+                        case "bool":
+                            typeName = "boolean";
+                            break;
+                        default:
+                            typeName = "string";
+                            break;
+                    }
+                    str1 += $"{keyName}:" + $"\"{typeName}\",";
+                    string desc = loData.notes[i];
+                    if (!string.IsNullOrEmpty(desc))
+                    {
+                        str1 += $"-- {desc}";
+                    }
+                    if (i < loData.names.Count - 1)
+                    {
+                        str1 += "\n\t";
+                    }
+                }
+
+
+                // 生成方法
+                //string str = string.Format(luaTemp, str0, str1);
+                string str = luaTemp.Replace("{0}", str0);
+                str = str.Replace("{1}", str1);
+                ret.Add(loData.name, str);
+            }
+
+            return ret;
+        }
+
         public static List<string> LoDataToLuaStrList(LoData loData)
         {
             List<string> ret = new List<string>();
@@ -533,7 +605,6 @@ namespace ConfigPacking
                         case "string":
                             if (valueStr != null)
                             {
-
                                 voStr = string.Format(temp, name, "\"" + valueStr.Replace("\"", "\\\"") + "\"");
                             }
                             break;
