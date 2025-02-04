@@ -520,11 +520,11 @@ namespace ConfigPacking
                 {
                     str0 += luaStrList[i];
                     if (i < luaStrList.Count - 1)
-                        str0 += ",\n\t";
+                        str0 += ",\n\t\t";
                 }
-
-                // 生成映射
+                // 生成type
                 string str1 = "";
+                string str2 = "";
                 for (int i = 0; i < loData.names.Count; i++)
                 {
                     string keyName = loData.names[i];
@@ -549,6 +549,7 @@ namespace ConfigPacking
                             break;
                     }
                     str1 += $"{keyName}:" + $"\"{typeName}\",";
+                    str2 += $"{keyName}=" + $"\"{keyName}\",";
                     string desc = loData.notes[i];
                     if (!string.IsNullOrEmpty(desc))
                     {
@@ -557,6 +558,7 @@ namespace ConfigPacking
                     if (i < loData.names.Count - 1)
                     {
                         str1 += "\n\t";
+                        str2 += "\n\t\t";
                     }
                 }
 
@@ -565,6 +567,7 @@ namespace ConfigPacking
                 //string str = string.Format(luaTemp, str0, str1);
                 string str = luaTemp.Replace("{0}", str0);
                 str = str.Replace("{1}", str1);
+                str = str.Replace("{2}", str2);
                 ret.Add(loData.name, str);
             }
 
@@ -653,7 +656,7 @@ namespace ConfigPacking
                 //ret.Add(jd);
                 if (!string.IsNullOrEmpty(itemStr))
                 {
-                    ret.Add("\t{" + itemStr + "}");
+                    ret.Add("{" + itemStr + "}");
                 }
             }
 

@@ -1,30 +1,18 @@
 local ConfigVo = {
 	data = {	
-		{id=1,key="TURN_TIMES",value="10"},
+			{id=1,key="TURN_TIMES"},
 		{id=2,key="TURN_TIMES111"},
 		{id=3,key="asd"},
-		{id=1,key="Test1",TestValue="hahaha",longTest=123123},
-		{id=1,key="Test2",name=12}
+		{id=1,key="Test1",TestValue="hahaha"},
+		{id=1,key="Test2"}
 	},
-	cacheMap = {},
-
-	k = {
-		id="id",
-		key="key",
-		value="value",
-		TestValue="TestValue",
-		longTest="longTest",
-		name="name",
-	},
+	cacheMap = {}
 }
 
 export type Type = {
 	id:"number",-- 主键
 	key:"string",-- 键
-	value:"string",-- 值
 	TestValue:"string",-- 测试值
-	longTest:"number",-- int64
-	name:"number",-- 多语言测试
 }
 
 function getKey(tableStr,all)

@@ -1,8 +1,15 @@
 local ConfigVo = {
 	data = {	
-			{id=1,key="TURN_TIMES",value="10"}
+		{id=1,key="TURN_TIMES",value="10"}
 	},
-	cacheMap = {}
+	cacheMap = {},
+
+	k = {
+		id="id",
+		key="key",
+		value="value",
+		
+	},
 }
 
 export type Type = {
