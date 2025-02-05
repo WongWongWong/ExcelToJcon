@@ -1,4 +1,5 @@
 local ConfigVo = {
+	name = "GameConfig123Setting",
 	data = {	
 		{id=1,key="TURN_TIMES",value="10"}
 	},
@@ -13,9 +14,9 @@ local ConfigVo = {
 }
 
 export type Type = {
-	id:"number",-- 主键
-	key:"string",-- 键
-	value:"string",-- 值
+	id:number,-- 主键
+	key:string,-- 键
+	value:string,-- 值
 	
 }
 

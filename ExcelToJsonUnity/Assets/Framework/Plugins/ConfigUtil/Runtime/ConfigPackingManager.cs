@@ -548,7 +548,7 @@ namespace ConfigPacking
                             typeName = "string";
                             break;
                     }
-                    str1 += $"{keyName}:" + $"\"{typeName}\",";
+                    str1 += $"{keyName}:" + $"{typeName},";
                     str2 += $"{keyName}=" + $"\"{keyName}\",";
                     string desc = loData.notes[i];
                     if (!string.IsNullOrEmpty(desc))
@@ -568,6 +568,7 @@ namespace ConfigPacking
                 string str = luaTemp.Replace("{0}", str0);
                 str = str.Replace("{1}", str1);
                 str = str.Replace("{2}", str2);
+                str = str.Replace("{3}", configName);
                 ret.Add(loData.name, str);
             }
 

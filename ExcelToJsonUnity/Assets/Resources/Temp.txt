@@ -1,4 +1,5 @@
 local ConfigVo = {
+	name = "{3}",
 	data = {	
 		{0}
 	},

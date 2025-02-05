@@ -1,4 +1,5 @@
 local ConfigVo = {
+	name = "GameConfigSetting",
 	data = {	
 		{id=1,key="TURN_TIMES",value="10"},
 		{id=2,key="TURN_TIMES111"},
@@ -19,12 +20,12 @@ local ConfigVo = {
 }
 
 export type Type = {
-	id:"number",-- 主键
-	key:"string",-- 键
-	value:"string",-- 值
-	TestValue:"string",-- 测试值
-	longTest:"number",-- int64
-	name:"number",-- 多语言测试
+	id:number,-- 主键
+	key:string,-- 键
+	value:string,-- 值
+	TestValue:string,-- 测试值
+	longTest:number,-- int64
+	name:number,-- 多语言测试
 }
 
 function getKey(tableStr,all)

@@ -1,18 +1,25 @@
 local ConfigVo = {
+	name = "GameConfigSetting",
 	data = {	
-			{id=1,key="TURN_TIMES"},
+		{id=1,key="TURN_TIMES"},
 		{id=2,key="TURN_TIMES111"},
 		{id=3,key="asd"},
 		{id=1,key="Test1",TestValue="hahaha"},
 		{id=1,key="Test2"}
 	},
-	cacheMap = {}
+	cacheMap = {},
+
+	k = {
+		id="id",
+		key="key",
+		TestValue="TestValue",
+	},
 }
 
 export type Type = {
-	id:"number",-- 主键
-	key:"string",-- 键
-	TestValue:"string",-- 测试值
+	id:number,-- 主键
+	key:string,-- 键
+	TestValue:string,-- 测试值
 }
 
 function getKey(tableStr,all)

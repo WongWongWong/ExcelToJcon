@@ -1,14 +1,22 @@
 local ConfigVo = {
+	name = "GameConfig123Setting",
 	data = {	
-			{id=1,key="TURN_TIMES",seval="10"}
+		{id=1,key="TURN_TIMES",seval="10"}
 	},
-	cacheMap = {}
+	cacheMap = {},
+
+	k = {
+		id="id",
+		key="key",
+		seval="seval",
+		
+	},
 }
 
 export type Type = {
-	id:"number",-- 主键
-	key:"string",-- 键
-	seval:"string",-- 值
+	id:number,-- 主键
+	key:string,-- 键
+	seval:string,-- 值
 	
 }
 
